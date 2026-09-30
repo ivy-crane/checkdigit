@@ -110,6 +110,70 @@ func TestValidateISBN13(t *testing.T) {
 	}
 }
 
+func TestISBN10ToISBN13(t *testing.T) {
+	cases := []struct {
+		name    string
+		in      string
+		want    string
+		wantErr bool
+	}{
+		{name: "plain", in: "0306406152", want: "9780306406157"},
+		{name: "hyphenated", in: "0-13-419044-0", want: "9780134190440"},
+		{name: "check digit X", in: "0-8044-2957-X", want: "9780804429573"},
+		{name: "bad check digit", in: "0-306-40615-3", wantErr: true},
+		{name: "empty", in: "", wantErr: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, err := ISBN10ToISBN13(c.in)
+			if c.wantErr {
+				if err == nil {
+					t.Fatalf("ISBN10ToISBN13(%q) = %q, nil; want error", c.in, got)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("ISBN10ToISBN13(%q) returned error: %v", c.in, err)
+			}
+			if got != c.want {
+				t.Errorf("ISBN10ToISBN13(%q) = %q, want %q", c.in, got, c.want)
+			}
+		})
+	}
+}
+
+func TestISBN13ToISBN10(t *testing.T) {
+	cases := []struct {
+		name    string
+		in      string
+		want    string
+		wantErr bool
+	}{
+		{name: "plain", in: "9780306406157", want: "0306406152"},
+		{name: "hyphenated", in: "978-0-13-419044-0", want: "0134190440"},
+		{name: "check digit X", in: "9780804429573", want: "080442957X"},
+		{name: "979 has no ISBN-10", in: "9791023456783", wantErr: true},
+		{name: "bad check digit", in: "9780306406150", wantErr: true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, err := ISBN13ToISBN10(c.in)
+			if c.wantErr {
+				if err == nil {
+					t.Fatalf("ISBN13ToISBN10(%q) = %q, nil; want error", c.in, got)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("ISBN13ToISBN10(%q) returned error: %v", c.in, err)
+			}
+			if got != c.want {
+				t.Errorf("ISBN13ToISBN10(%q) = %q, want %q", c.in, got, c.want)
+			}
+		})
+	}
+}
+
 func TestEAN13CheckDigit(t *testing.T) {
 	cases := []struct {
 		name    string

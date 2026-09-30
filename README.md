@@ -66,9 +66,10 @@ into whatever validation or generation code calls them.
 ## Status
 
 Early. The four formats above are implemented and tested against known
-reference numbers. Not yet covered: ISBN-10/ISBN-13 conversion, EAN-8,
-and a batch-checking helper for reading a list of identifiers from a
-file.
+reference numbers. `ISBN10ToISBN13` and `ISBN13ToISBN10` convert between
+the two ISBN forms (only 978-prefixed ISBN-13s have an ISBN-10 form). Not
+yet covered: EAN-8 and a batch-checking helper for reading a list of
+identifiers from a file.
 
 ## License
 

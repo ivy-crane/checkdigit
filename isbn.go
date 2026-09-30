@@ -59,6 +59,40 @@ func ISBN13CheckDigit(digits string) (byte, error) {
 	return mod10CheckDigit(digits, 1)
 }
 
+// ISBN10ToISBN13 converts a valid ISBN-10 to its ISBN-13 form by prefixing
+// 978 and recomputing the check digit. Hyphens and spaces in s are ignored
+// and the result is returned as 13 bare digits.
+func ISBN10ToISBN13(s string) (string, error) {
+	if !ValidateISBN10(s) {
+		return "", fmt.Errorf("checkdigit: %q is not a valid ISBN-10", s)
+	}
+	prefix := "978" + stripSeparators(s)[:9]
+	check, err := ISBN13CheckDigit(prefix)
+	if err != nil {
+		return "", err
+	}
+	return prefix + string(check), nil
+}
+
+// ISBN13ToISBN10 converts a valid ISBN-13 to ISBN-10. Only the 978 prefix
+// has ISBN-10 equivalents; a 979 ISBN-13 returns an error. Hyphens and
+// spaces in s are ignored and the result is returned as 10 bare characters.
+func ISBN13ToISBN10(s string) (string, error) {
+	if !ValidateISBN13(s) {
+		return "", fmt.Errorf("checkdigit: %q is not a valid ISBN-13", s)
+	}
+	clean := stripSeparators(s)
+	if clean[:3] != "978" {
+		return "", fmt.Errorf("checkdigit: ISBN-13 %q has no ISBN-10 form outside the 978 prefix", s)
+	}
+	body := clean[3:12]
+	check, err := ISBN10CheckDigit(body)
+	if err != nil {
+		return "", err
+	}
+	return body + string(check), nil
+}
+
 // ValidateISBN13 reports whether s is a 13-digit ISBN with a correct check
 // digit. Hyphens and spaces in s are ignored.
 func ValidateISBN13(s string) bool {
